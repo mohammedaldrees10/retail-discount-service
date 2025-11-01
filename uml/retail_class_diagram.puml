@@ -1,42 +1,150 @@
-
-@startuml RetailDiscountService
+@startuml
+' =======================
+' Domain Layer
+' =======================
 package domain {
   class User {
-    - id: String
+    - id: UUID
     - name: String
-    - type: String
+    - userType: UserType
     - registeredDate: LocalDate
   }
+  
   class Item {
-    - description: String
-    - category: String
+    - id: UUID
+    - name: String
     - price: double
-    - quantity: int
+    - itemType: ItemType
   }
+
+  class CustomerOrder {
+    - id: UUID
+    - userId: UUID
+    - items: List<Item>
+    - orderDate: LocalDate
+  }
+
   class Bill {
-    - userId: String
-    - items: Map<String, Double>
+    - id: UUID
+    - orderId: UUID
+    - totalAmount: double
+    - discountApplied: double
+    - netPayableAmount: double
+  }
+
+  enum UserType <<enumeration>> {
+    EMPLOYEE
+    AFFILIATE
+    CUSTOMER
+  }
+
+  enum ItemType <<enumeration>> {
+    GROCERY
+    OTHER
   }
 }
+
+' =======================
+' DTO Layer
+' =======================
+package dto {
+  class CustomerOrderRequest
+  class BillResponse
+  class UserRequest
+  class UserResponse
+  class ItemRequest
+  class ItemResponse
+}
+
+' =======================
+' Service Layer
+' =======================
 package service {
   class DiscountService {
-    + calculateNetPayable(User, Bill): double
+    + calculateBill(CustomerOrderRequest): BillResponse
+  }
+  
+  class UserService {
+    + getAllUsers(): List<UserResponse>
+    + getUserById(UUID): UserResponse
+    + createUser(UserRequest): UserResponse
+    + updateUser(UUID, UserRequest): UserResponse
+    + deleteUser(UUID): void
+  }
+
+  class ItemService {
+    + getAllItems(): List<ItemResponse>
+    + getItemById(UUID): ItemResponse
+    + createItem(ItemRequest): ItemResponse
+    + updateItem(UUID, ItemRequest): ItemResponse
+    + deleteItem(UUID): void
   }
 }
+
+' =======================
+' Repository Layer
+' =======================
 package repository {
   interface UserRepository
+  interface ItemRepository
 }
+
+' =======================
+' Controller Layer
+' =======================
 package controller {
   class BillController {
     - discountService: DiscountService
-    - userRepository: UserRepository
-    + calculate(Bill): double
+    + calculate(CustomerOrderRequest): BillResponse
+  }
+
+  class UserController {
+    - userService: UserService
+    + getAllUsers(): List<UserResponse>
+    + getUserById(UUID): UserResponse
+    + createUser(UserRequest): UserResponse
+    + updateUser(UUID, UserRequest): UserResponse
+    + deleteUser(UUID): void
+  }
+
+  class ItemController {
+    - itemService: ItemService
+    + getAllItems(): List<ItemResponse>
+    + getItemById(UUID): ItemResponse
+    + createItem(ItemRequest): ItemResponse
+    + updateItem(UUID, ItemRequest): ItemResponse
+    + deleteItem(UUID): void
   }
 }
 
-User ..> Bill : owns >
-Bill o-- Item
-BillController --> DiscountService
-BillController --> UserRepository
+' =======================
+' Relationships
+' =======================
+' Domain relationships
+User ..> CustomerOrder : places >
+CustomerOrder o-- Item : contains >
+Bill ..> CustomerOrder : represents >
+
+' Service uses
 DiscountService ..> User : uses
+DiscountService ..> CustomerOrder : uses
+DiscountService ..> CustomerOrderRequest
+DiscountService ..> BillResponse
+
+UserService ..> UserRequest
+UserService ..> UserResponse
+ItemService ..> ItemRequest
+ItemService ..> ItemResponse
+
+' Controller uses
+BillController --> DiscountService
+BillController --> BillResponse
+UserController --> UserService
+UserController --> UserResponse
+ItemController --> ItemService
+ItemController --> ItemResponse
+
+' Repositories
+UserService ..> UserRepository
+ItemService ..> ItemRepository
 @enduml
