@@ -6,9 +6,8 @@ This Spring Boot REST API calculates the net payable amount for a retail store b
 ## Features
 - Percentage-based and flat discounts
 - MongoDB persistence
-- Unit tests with Mockito
+- Unit tests with Mockito and Integration Test
 - Docker & docker-compose support
-- JaCoCo test coverage
 
 ## Run Locally
 ```bash
@@ -21,10 +20,7 @@ mvn spring-boot:run
 docker-compose up --build
 ```
 
-## Test & Coverage
+## Test 
 ```bash
 mvn test
-mvn jacoco:report
 ```
-
-Coverage report available at: `target/site/jacoco/index.html`.
