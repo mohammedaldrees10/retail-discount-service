@@ -1,0 +1,42 @@
+
+@startuml RetailDiscountService
+package domain {
+  class User {
+    - id: String
+    - name: String
+    - type: String
+    - registeredDate: LocalDate
+  }
+  class Item {
+    - description: String
+    - category: String
+    - price: double
+    - quantity: int
+  }
+  class Bill {
+    - userId: String
+    - items: Map<String, Double>
+  }
+}
+package service {
+  class DiscountService {
+    + calculateNetPayable(User, Bill): double
+  }
+}
+package repository {
+  interface UserRepository
+}
+package controller {
+  class BillController {
+    - discountService: DiscountService
+    - userRepository: UserRepository
+    + calculate(Bill): double
+  }
+}
+
+User ..> Bill : owns >
+Bill o-- Item
+BillController --> DiscountService
+BillController --> UserRepository
+DiscountService ..> User : uses
+@enduml
